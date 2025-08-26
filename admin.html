@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Student Portal</title>
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+  <style>
+    /* ---------- Global Styles ---------- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f4f7fb; }
+    header, footer { padding: 20px; text-align: center; }
+    header { background: linear-gradient(90deg, #0077cc, #00b894); color: white; }
+    footer { background: #222; color: white; margin-top: 20px; }
+    h1, h2, h3 { margin-bottom: 10px; }
+    .hidden { display: none; }
+
+    /* ---------- Navbar ---------- */
+    nav {
+      background: #333; color: white; display: flex; justify-content: center; padding: 10px;
+    }
+    nav button {
+      margin: 0 10px; padding: 8px 15px; border: none; background: #0077cc; color: white;
+      border-radius: 5px; cursor: pointer;
+    }
+    nav button:hover { background: #005fa3; }
+
+    /* ---------- Login Page ---------- */
+    #loginPage {
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+      background: linear-gradient(135deg, #74b9ff, #a29bfe);
+    }
+    .login-box {
+      background: white; padding: 30px; border-radius: 12px; width: 320px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2); text-align: center;
+    }
+    .login-box h2 { margin-bottom: 20px; }
+    .login-box input, .login-box select {
+      width: 100%; padding: 10px; margin: 8px 0;
+      border: 1px solid #ccc; border-radius: 5px;
+    }
+    .login-box button {
+      width: 100%; padding: 10px; background: #0077cc; border: none; border-radius: 5px;
+      color: white; font-weight: bold; margin-top: 10px; cursor: pointer;
+    }
+    .login-box button:hover { background: #005fa3; }
+
+    /* ---------- Table Styles ---------- */
+    table {
+      width: 95%; margin: 20px auto; border-collapse: collapse; background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    th, td { padding: 12px; border: 1px solid #ddd; text-align: center; }
+    th { background: #0077cc; color: white; }
+    tr:nth-child(even) { background: #f2f2f2; }
+    button.actionBtn {
+      padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer;
+    }
+    .editBtn { background: #ff9800; color: white; }
+    .viewBtn { background: green; color: white; }
+    .editBtn:hover { background: #e68900; }
+    .viewBtn:hover { background: darkgreen; }
+
+    /* ---------- Modal ---------- */
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 10;
+    }
+    .modal-content {
+      background: white; padding: 20px; border-radius: 8px; width: 400px; text-align: center;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-content input { width: 100%; padding: 8px; margin-top: 5px; }
+    .modal-content img { max-width: 120px; border-radius: 50%; margin-top: 10px; }
+    .modal-content button { margin-top: 10px; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
+    .saveBtn { background: green; color: white; }
+    .closeBtn { background: red; color: white; margin-left: 10px; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 600px) {
+      .modal-content { width: 90%; }
+      table { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ---------- Login Page ---------- -->
+  <div id="loginPage">
+    <div class="login-box">
+      <h2>Smart Student Portal</h2>
+      <input type="text" id="username" placeholder="Enter Username">
+      <input type="password" id="password" placeholder="Enter Password">
+      <select id="role">
+        <option value="student">Student</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button onclick="login()">Login</button>
+    </div>
+  </div>
+
+  <!-- ---------- Main Portal ---------- -->
+  <div id="portal" class="hidden">
+    <header>
+      <h1 id="portalTitle">Portal</h1>
+      <p>Welcome to the Smart Student Portal</p>
+    </header>
+    <nav>
+      <button onclick="showPage('studentPage')">Student Page</button>
+      <button id="adminBtn" onclick="showPage('adminPage')">Admin Page</button>
+      <button onclick="logout()">Logout</button>
+    </nav>
+
+    <!-- ---------- Student Page ---------- -->
+    <div id="studentPage" class="page hidden">
+      <h2 style="text-align:center;margin-top:20px;">🎓 Student Page</h2>
+      <p style="text-align:center;">Click "View" to see student photo & bio-data</p>
+      <table id="studentTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Name</th><th>Department</th><th>Email</th><th>Phone</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- ---------- Admin Page ---------- -->
+    <div id="adminPage" class="page hidden">
+      <h2 style="text-align:center;margin-top:20px;">⚙️ Admin Page</h2>
+      <p style="text-align:center;">Edit details & upload student photos (human face only)</p>
+      <table id="adminTable">
+        <thead>
+          <tr>
+            <th>ID</th><th>Name</th><th>Department</th><th>Email</th><th>Phone</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 Smart Student Portal</p>
+    </footer>
+  </div>
+
+  <!-- ---------- View Modal ---------- -->
+  <div class="modal" id="viewModal">
+    <div class="modal-content">
+      <h2 id="vName"></h2>
+      <img id="vPhoto" src="" alt="Student Photo">
+      <p><b>Department:</b> <span id="vDept"></span></p>
+      <p><b>Email:</b> <span id="vEmail"></span></p>
+      <p><b>Phone:</b> <span id="vPhone"></span></p>
+      <button class="closeBtn" onclick="closeModal('viewModal')">Close</button>
+    </div>
+  </div>
+
+  <!-- ---------- Edit Modal ---------- -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h2>Edit Student</h2>
+      <label>Name</label>
+      <input type="text" id="editName">
+      <label>Department</label>
+      <input type="text" id="editDept">
+      <label>Email</label>
+      <input type="email" id="editEmail">
+      <label>Phone</label>
+      <input type="text" id="editPhone">
+      <label>Upload Photo</label>
+      <input type="file" id="editPhoto" accept="image/*">
+      <img id="previewPhoto" src="">
+      <br>
+      <button class="saveBtn" onclick="saveEdit()">Save</button>
+      <button class="closeBtn" onclick="closeModal('editModal')">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Initialize Students ----------
+    const defaultStudents = [];
+    for (let i = 1; i <= 31; i++) {
+      defaultStudents.push({
+        id: i,
+        name: "Student " + i,
+        department: "Dept " + ((i % 5) + 1),
+        email: "student" + i + "@college.com",
+        phone: "98765432" + (i < 10 ? "0" + i : i),
+        photo: ""
+      });
+    }
+    if (!localStorage.getItem("students")) {
+      localStorage.setItem("students", JSON.stringify(defaultStudents));
+    }
+    let students = JSON.parse(localStorage.getItem("students"));
+    let currentRole = "";
+    let currentEditId = null;
+    let uploadedPhoto = null;
+
+    // ---------- Login ----------
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
+      if ((role === "admin" && user === "admin" && pass === "admin123") ||
+          (role === "student" && user !== "" && pass !== "")) {
+        currentRole = role;
+        document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("portal").classList.remove("hidden");
+        document.getElementById("portalTitle").innerText = role === "admin" ? "Admin Portal" : "Student Portal";
+        document.getElementById("adminBtn").style.display = role === "admin" ? "inline-block" : "none";
+        showPage(role === "admin" ? "adminPage" : "studentPage");
+      } else {
+        alert("Invalid credentials!");
+      }
+    }
+    function logout() {
+      location.reload();
+    }
+
+    // ---------- Navigation ----------
+    function showPage(pageId) {
+      document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
+      document.getElementById(pageId).classList.remove("hidden");
+      if (pageId === "studentPage") loadStudentTable();
+      if (pageId === "adminPage") loadAdminTable();
+    }
+
+    // ---------- Student Table ----------
+    function loadStudentTable() {
+      const tbody = document.querySelector("#studentTable tbody");
+      tbody.innerHTML = "";
+      students.forEach(st => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${st.id}</td>
+            <td>${st.name}</td>
+            <td>${st.department}</td>
+            <td>${st.email}</td>
+            <td>${st.phone}</td>
+            <td><button class="actionBtn viewBtn" onclick="viewStudent(${st.id})">View</button></td>
+          </tr>`;
+      });
+    }
+
+    function viewStudent(id) {
+      const st = students.find(s => s.id === id);
+      document.getElementById("vName").innerText = st.name;
+      document.getElementById("vDept").innerText = st.department;
+      document.getElementById("vEmail").innerText = st.email;
+      document.getElementById("vPhone").innerText = st.phone;
+      document.getElementById("vPhoto").src = st.photo || "https://via.placeholder.com/150";
+      document.getElementById("viewModal").style.display = "flex";
+    }
+
+    // ---------- Admin Table ----------
+    function loadAdminTable() {
+      const tbody = document.querySelector("#adminTable tbody");
+      tbody.innerHTML = "";
+      students.forEach(st => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${st.id}</td>
+            <td>${st.name}</td>
+            <td>${st.department}</td>
+            <td>${st.email}</td>
+            <td>${st.phone}</td>
+            <td><button class="actionBtn editBtn" onclick="openEdit(${st.id})">Edit</button></td>
+          </tr>`;
+      });
+    }
+
+    function openEdit(id) {
+      currentEditId = id;
+      const st = students.find(s => s.id === id);
+      document.getElementById("editName").value = st.name;
+      document.getElementById("editDept").value = st.department;
+      document.getElementById("editEmail").value = st.email;
+      document.getElementById("editPhone").value = st.phone;
+      document.getElementById("previewPhoto").src = st.photo || "";
+      document.getElementById("editPhoto").value = "";
+      uploadedPhoto = null;
+      document.getElementById("editModal").style.display = "flex";
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    // ---------- Face Detection Upload ----------
+    async function loadModels() {
+      await faceapi.nets.tinyFaceDetector.loadFromUri("https://cdn.jsdelivr.net/npm/face-api.js/weights");
+    }
+    loadModels();
+
+    document.getElementById("editPhoto").addEventListener("change", async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async function(ev) {
+        const img = new Image();
+        img.src = ev.target.result;
+        img.onload = async () => {
+          const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions());
+          if (detections.length > 0) {
+            uploadedPhoto = ev.target.result;
+            document.getElementById("previewPhoto").src = uploadedPhoto;
+            alert("✅ Human face detected. Photo accepted.");
+          } else {
+            uploadedPhoto = null;
+            alert("❌ No human face detected. Please upload a valid photo.");
+          }
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function saveEdit() {
+      const st = students.find(s => s.id === currentEditId);
+      st.name = document.getElementById("editName").value;
+      st.department = document.getElementById("editDept").value;
+      st.email = document.getElementById("editEmail").value;
+      st.phone = document.getElementById("editPhone").value;
+      if (uploadedPhoto) st.photo = uploadedPhoto;
+      localStorage.setItem("students", JSON.stringify(students));
+      closeModal("editModal");
+      loadAdminTable();
+      alert("✅ Student details updated successfully!");
+    }
+  </script>
+</body>
+</html>

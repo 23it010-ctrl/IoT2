@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact - Portal</title>
+  <style>
+    body { margin:0; font-family:Arial; }
+    nav { background:#007bff; padding:15px; display:flex; justify-content:space-between; color:white; }
+    nav a { color:white; margin:0 10px; text-decoration:none; }
+    nav a:hover { text-decoration:underline; }
+    .form-box { width:400px; margin:40px auto; background:#f9f9f9; padding:20px; border-radius:8px; box-shadow:0 0 5px #aaa; }
+    input, textarea, button { width:100%; margin:10px 0; padding:10px; border:1px solid #ccc; border-radius:5px; }
+    button { background:#007bff; color:white; cursor:pointer; }
+    button:hover { background:#0056b3; }
+  </style>
+</head>
+<body onload="checkLogin()">
+  <nav>
+    <div>Contact Portal</div>
+    <div>
+      <a href="home.html">Home</a>
+      <a href="student.html">Students</a>
+      <a href="faculty.html">Faculty</a>
+      <a href="contact.html">Contact</a>
+      <a href="logout.html">Logout</a>
+    </div>
+  </nav>
+
+  <div class="form-box">
+    <h2>Contact Us</h2>
+    <input type="text" id="name" placeholder="Your Name">
+    <input type="email" id="email" placeholder="Your Email">
+    <textarea id="message" placeholder="Your Message"></textarea>
+    <button onclick="saveMessage()">Submit</button>
+  </div>
+
+  <script>
+    function checkLogin(){
+      if(localStorage.getItem("isLoggedIn") !== "true"){ window.location.href="login.html"; }
+    }
+    function saveMessage(){
+      let name = document.getElementById('name').value;
+      let email = document.getElementById('email').value;
+      let message = document.getElementById('message').value;
+      if(name && email && message){
+        let messages = JSON.parse(localStorage.getItem("messages") || "[]");
+        messages.push({name,email,message});
+        localStorage.setItem("messages", JSON.stringify(messages));
+        alert("Message saved locally!");
+      } else {
+        alert("Fill all fields!");
+      }
+    }
+  </script>
+</body>
+</html>

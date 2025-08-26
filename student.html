@@ -1,0 +1,152 @@
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Students - Portal</title>
+  <style>
+    body { margin:0; font-family:Arial; }
+    nav { background:#007bff; padding:15px; display:flex; justify-content:space-between; color:white; }
+    nav a { color:white; margin:0 10px; text-decoration:none; }
+    nav a:hover { text-decoration:underline; }
+    table { border-collapse:collapse; width:80%; margin:30px auto; }
+    th, td { border:1px solid #ddd; padding:10px; text-align:center; }
+    th { background:#007bff; color:white; }
+  </style>
+</head>
+<body onload="loadStudents()">
+  <nav>
+    <div>Student Portal</div>
+    <div>
+      <a href="home.html">Home</a>
+      <a href="student.html">Students</a>
+      <a href="faculty.html">Faculty</a>
+      <a href="contact.html">Contact</a>
+      <a href="logout.html">Logout</a>
+    </div>
+  </nav>
+
+  <h2 style="text-align:center;">Student Records</h2>
+  <table id="studentTable">
+    <tr><th>ID</th><th>Name</th><th>Course</th><th>Email</th></tr>
+  </table>
+
+  <script>
+    function loadStudents(){
+      if(localStorage.getItem("isLoggedIn") !== "true"){ window.location.href="login.html"; return; }
+      let students = JSON.parse(localStorage.getItem("students") || "[]");
+      if(students.length === 0){
+        students = [
+          {id:"101", name:"Aryan", course:"B.Tech", email:"aryan@mail.com"},
+          {id:"102", name:"Meena", course:"MCA", email:"meena@mail.com"},
+          {id:"103", name:"Rahul", course:"B.Sc", email:"rahul@mail.com"}
+        ];
+        localStorage.setItem("students", JSON.stringify(students));
+      }
+      let table = document.getElementById("studentTable");
+      students.forEach(s => {
+        let row = table.insertRow();
+        row.insertCell(0).innerText = s.id;
+        row.insertCell(1).innerText = s.name;
+        row.insertCell(2).innerText = s.course;
+        row.insertCell(3).innerText = s.email;
+      });
+    }
+  </script>
+</body>
+</html>
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Page - View Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f7fb; margin: 0; }
+    header { background: #0077cc; color: white; padding: 20px; text-align: center; }
+    table { width: 95%; margin: 20px auto; border-collapse: collapse; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    th { background: #0077cc; color: white; }
+    tr:nth-child(even) { background: #f2f2f2; }
+    button { padding: 5px 10px; border: none; cursor: pointer; border-radius: 5px; }
+    .viewBtn { background: green; color: white; }
+    .viewBtn:hover { background: darkgreen; }
+    footer { text-align: center; padding: 15px; background: #222; color: white; margin-top: 30px; }
+
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+             background: rgba(0,0,0,0.6); justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 8px; width: 400px; text-align: center; }
+    .modal-content img { max-width: 150px; border-radius: 50%; margin-bottom: 10px; }
+    .closeBtn { background: red; color: white; padding: 5px 10px; margin-top: 10px; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎓 Student Page</h1>
+    <p>Click "View" to see student photo and bio-data</p>
+  </header>
+
+  <table id="studentTable">
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Department</th><th>Email</th><th>Phone</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <footer>
+    <p>&copy; 2025 Student Portal</p>
+  </footer>
+
+  <!-- View Modal -->
+  <div class="modal" id="viewModal">
+    <div class="modal-content">
+      <h2 id="vName"></h2>
+      <img id="vPhoto" src="" alt="Student Photo">
+      <p><b>Department:</b> <span id="vDept"></span></p>
+      <p><b>Email:</b> <span id="vEmail"></span></p>
+      <p><b>Phone:</b> <span id="vPhone"></span></p>
+      <button class="closeBtn" onclick="closeView()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const students = JSON.parse(localStorage.getItem("students"));
+    const tbody = document.querySelector("#studentTable tbody");
+
+    function loadTable() {
+      tbody.innerHTML = "";
+      students.forEach(st => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${st.id}</td>
+            <td>${st.name}</td>
+            <td>${st.department}</td>
+            <td>${st.email}</td>
+            <td>${st.phone}</td>
+            <td><button class="viewBtn" onclick="viewStudent(${st.id})">View</button></td>
+          </tr>`;
+      });
+    }
+
+    function viewStudent(id) {
+      const st = students.find(s => s.id === id);
+      document.getElementById("vName").innerText = st.name;
+      document.getElementById("vDept").innerText = st.department;
+      document.getElementById("vEmail").innerText = st.email;
+      document.getElementById("vPhone").innerText = st.phone;
+      document.getElementById("vPhoto").src = st.photo || "https://via.placeholder.com/150";
+      document.getElementById("viewModal").style.display = "flex";
+    }
+
+    function closeView() {
+      document.getElementById("viewModal").style.display = "none";
+    }
+
+    loadTable();
+  </script>
+</body>
+</html>
